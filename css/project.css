@@ -1,0 +1,161 @@
+.noneTip, ol, ul {
+    list-style: none
+}
+
+.noneTip, .page_title, header.header {
+    text-align: center
+}
+
+.clearfloat:after, .clearfloat:before {
+    content: " ";
+    display: table
+}
+
+.clearfloat {
+    clear: both
+}
+
+html {
+    background-color: #f2f2f2
+}
+
+body, html {
+    max-width: 640px !important
+}
+
+a, div, img, input, li, span, textarea, ul {
+    -webkit-box-sizing: border-box
+}
+
+header.header {
+    z-index: 100;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 7px 15px;
+    background-color: #333;
+    color: #fff;
+    border-bottom: solid 1px #ddd
+}
+
+header.header .back {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: inline-block;
+    width: 11px;
+    height: 18px;
+    background: url(../images/back.png) no-repeat;
+    background-size: cover
+}
+
+header.header .title {
+    display: inline-block;
+    font-size: 18px;
+    line-height: 20px;
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1
+}
+
+.page_title {
+    font-size: 34px;
+    color: #3cc51f;
+    font-weight: 400;
+    margin: 0 10%
+}
+
+.noneTip {
+    font-size: 15px;
+    color: #999;
+    padding: 10px
+}
+
+.button.weui_btn {
+    font-size: 15px;
+    line-height: 35px;
+    background-color: #2f90f1
+}
+
+.button.weui_btn.nagative {
+    background-color: #ebebeb !important;
+    color: #a7a7a7
+}
+
+.weui_navbar_item:active {
+    background-color: rgba(0, 0, 0, 0)
+}
+
+input:-webkit-autofill {
+    background-color: rgba(0, 0, 0, 0)
+}
+
+.weui_dialog {
+    padding: 0 10px;
+    border-radius: 6px
+}
+
+.weui_dialog_hd {
+    position: relative;
+    padding: 0;
+    line-height: 45px;
+    color: #bb000e;
+    border-bottom: solid 1px #bb000e
+}
+
+.weui_dialog_hd:before {
+    content: "";
+    display: inline-block;
+    width: 185px;
+    height: 93px;
+    background: url(../images/sangeng.png?1)no-repeat;
+    background-size: 185px 93px;
+    position: absolute;
+    left: 6px;
+    top: -39px
+}
+
+.weui_dialog_bd {
+    padding: 15px 10px;
+    font-size: 16px;
+    color: #333
+}
+
+.weui_dialog_ft {
+    margin-top: 10px
+}
+
+.weui_btn_dialog.primary {
+    background: #bb000e;
+    color: #fff;
+    font-size: 16px;
+    margin: 0 -10px;
+    border-radius: 0 0 6px 6px
+}
+/* 过渡动画 */
+/* 渐变位移 */
+.fade-slide-enter-active, .fade-slide-leave-active {  transition: all .5s;  transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0);}
+.fade-slide-enter, .fade-slide-leave-active {  opacity: 0; transform: translate3d(20px,0,0); -webkit-transform: translate3d(20px,0,0);}
+
+/*位移动画*/
+.slide-enter-active, .slide-leave-active {  transition: all .8s;  }
+.slide-enter, .slide-leave-active {  opacity: 0; transform:translate3d( 0,20px,0); -webkit-transform:translate3d( 0,20px,0); }
+
+/* 渐变 */
+.fade-enter-active, .fade-leave-active {  transition: opacity .5s;  }
+.fade-enter, .fade-leave-active {  opacity: 0;  }
+
+/* 列表位移动画 */
+.list-complete-enter-actice{opacity: 0;  transform: translateY(0px);}
+.list-complete-enter, .list-complete-leave-active {  opacity: 0;  transform: translateY(30px);  }
+.list-complete-leave-active {  position: absolute;  }
+
+/* 列表位移动画 */
+.list-enter-active, .list-leave-active {  transition: all .6s;  }
+.list-enter, .list-leave-active {  opacity: 0;  transform: translateY(20px);  }
+
+body{
+    transition: opacity .5s;
+}
+.weui_btn{line-height: 36px;}

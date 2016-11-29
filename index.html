@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5定位</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+    <link rel="stylesheet" href="./css/weui.css">
+    <link rel="stylesheet" href="./css/jquery-weui.min.css">
+    <link rel="stylesheet" href="./css/project.css">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=3tNmobyDXvMyo8xL8GTULduAoxWeAihe&coord=bd09ll"></script>
+    <script type="text/javascript" src="./js/vue2.0.js"></script>
+    <script type="text/javascript" src="./js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="./js/jquery-weui.min.js"></script>
+    <script type="text/javascript" src="./js/baidu.js"></script>
+
+    <style>
+        body, html {  width: 100%;  height: 100%;  }
+        header.header .save{  position: absolute;  right: 10px;  top: 0;  font-size: 18px;  bottom: 0;  color: #fff;  line-height: 39px;  display: inline-block;  }
+        .weui_cells {  margin: 0;  }
+        .weui_cell{height: 55px;}
+        .weui_cells:before {  display: none;  }
+        .weui_cell_hd {  font-size: 16px;  color: #333;  white-space: nowrap;  }
+        .weui_cell_hd .weui_input {  text-indent: 10px;  }
+        .weui_btn_warn {  background-color: #bb000e;  }
+        .weui_input {  text-align: right;  }
+
+        .weui_switch{height: 27px;width: 53px;}
+        .weui_switch:checked{border-color: #bb000e;  background-color: #bb000e;}
+        .weui_switch:before,.weui_switch:after{height: 25px;}
+        .weui_switch:before{width: 51px;}
+        .weui_switch:after{width: 25px;}
+        .weui_switch:checked:after{-webkit-transform: translateX(26px);  transform: translateX(26px);}
+
+        .point{position: fixed;top:calc(50% + 40px);left:50%;-webkit-transform:translate3d(-50%,-50%,0);z-index: 101;transition: all .5s;}
+        .showMsg{position: fixed;bottom: 10px;left: 15px;right: 15px;}
+
+        /* 百度地图搜索框结果 */
+        .tangram-suggestion-main{  padding-top: 8px!important;  left: 0!important;  width: 100%!important;  }
+    </style>
+</head>
+<body>
+<div id="body" style="width: 100%;height: 100%;">
+    <div v-if="showMap">
+        <header class="header">
+            <span class="back"></span>
+            <p class="title">请输入新地址</p>
+        </header>
+        <div style="height: 40px;"></div>
+        <div class="weui_cells weui_cells_access">
+            <div class="weui_cell">
+                <div class="weui_cell_hd weui_cell_primary">所在城市</div>
+                <div class="weui_cell_bd" v-text="form.city">
+                </div>
+            </div>
+            <div  class="weui_cell">
+                <div class="weui_cell_hd weui_cell_primary">所在地址</div>
+                <div class="weui_cell_bd" v-text="form.street"></div>
+            </div>
+            <div class="weui_cell">
+                <div class="weui_cell_hd">详细地址</div>
+                <div class="weui_cell_hd weui_cell_primary">
+                    <input type="text"  v-model="form.houseNumber" class="weui_input"
+                           placeholder="请填写楼盘街道及门牌号"/>
+                </div>
+            </div>
+
+            <label for="defStatus" class="weui_cell weui_cell_switch">
+                <div class="weui_cell_hd">设为默认</div>
+                <div class="weui_cell_bd weui_cell_primary" style="text-align: right;">
+                    <input v-model="form.defStatus" id="defStatus" class="weui_switch" type="checkbox" style="margin-bottom: -7px;">
+                </div>
+            </label>
+
+        </div>
+        <div class="weui_btn_area">
+            <a @click="submit" class="weui_btn weui_btn_warn">保存并使用</a>
+        </div>
+
+    </div>
+
+    <div id="allmap" v-if="!showMap" style="width: 100%; height:100%;padding-top:40px;overflow:hidden;zoom:1;position:relative;">
+        <header class="header">
+            <span class="back" ></span>
+            <p class="title" id="addressMsg" v-text="addressMsg" style="max-width: 80%;line-height:25px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"></p>
+            <span class="save" @click="saveAddress">保存</span>
+        </header>
+        <!-- 百度地图 --start -->
+        <div id="map" style="position:absolute;top:80px;bottom:0;left:0;right:0;-webkit-transition: all 0.5s ease-in-out;transition: all 0.5s ease-in-out;"></div>
+        <!-- 百度地图 --end -->
+
+        <div style="position: fixed;z-index: 1001;top:40px;left: 0;right: 0;height: 38px;padding:5px 10px;background-color: #f4f4f4;">
+            <div class="weui_search_inner" style="background-color: #fff;border-radius: 4px;">
+                <i class="weui_icon_search"></i>
+                <input type="search" class="weui_search_input" id="searchInput" placeholder="请选择小区、学校或大厦"/>
+            </div>
+            <div id="searchResultPanel" style="width:100%;height:auto; display:block;font-size: 15px;"></div>
+        </div>
+        <div class="point" v-show="!showMap"><img width="30" height="30" src="./images/point.png"></div>
+    </div>
+</div>
+
+
+<script>
+    var vm = new Vue({
+        el: '#body',
+        data: function () {               // 所有的数据
+            return {
+                resAddress:{},
+                point: {},               // 用户当前的坐标，根据ip自动定位，定位到区级
+                showMap: false,         // 控制地图显示/隐藏的开关
+                addressMsg:'',
+                rules: {                // 表单验证规则
+                    city: {msg: '请选择城市'},
+                    street: {msg: '请选择所在地址'},
+                    houseNumber: {msg: '请填写详细地址'}
+                },
+                form: {                 // 收货地址表单
+                    city: '',           // 省、市
+                    street: '',         // 区、街道
+                    houseNumber: '',    // 门牌号
+                    addressAreaIds:[],
+                    point:{},
+                    defStatus:true
+                }
+            }
+        },
+        methods: {                      // 所有的方法
+            setAddress: function () {
+                var olddata = this.form;
+                // 添加地址的表单
+                $.ajax({
+                    type: 'POST',
+                    url: '${url}/takeaway/Address!updateAddress.action',
+                    data: {
+                        "addressAreaIds": olddata.addressAreaIds.join(","),
+                        "fullAddress": olddata.city + olddata.street + olddata.houseNumber,
+                        "lat": olddata.point.lat,
+                        "lng": olddata.point.lng,
+                        "addressTo": olddata.street + olddata.houseNumber,
+                        "defStatus":olddata.defStatus
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                        if (data.successMsg == '保存成功') {    // 如果设置成功则跳转到上一页
+                            window.history.go(-1);
+                        }else{
+                            $.toptip('保存失败', 1000,'error');
+                        }
+                    }
+                })
+            },
+            saveAddress: function () {
+                if (this.resAddress.district) {
+                    var rs = this.resAddress;
+                    this.form.city = rs.province.replace('省','')+" " + rs.city;
+                    this.form.street = rs.district + rs.street;
+                    this.form.houseNumber = rs.streetNumber;
+                    this.form.addressAreaIds = rs.addressAreaIds;
+                    this.form.point = rs.point;
+                    this.showMap = true;
+                }else{
+                    $.alert('地址错误');
+                }
+            },
+
+            checkValid: function () {
+                var _this = this;
+                for (var rule in this.rules) {
+                    if (!this.form[rule]) {
+                        $.toptip(this.rules[rule].msg, 'warning');
+                        return false
+                    }
+                }
+                return true
+            },
+            submit: function () {
+                if (this.checkValid()) { // 表单验证
+                    this.setAddress();      // 设置地址
+                }
+            }
+        },
+        created: function () {          // 加载页面时调用
+            setTimeout(function () {
+                initMap(function (rs) {
+                    vm.resAddress = rs;
+                    $('#addressMsg').text(rs.addressMsg);
+                });
+            },100);
+
+        }
+    });
+
+
+</script>
+
+</body>
+</html>
