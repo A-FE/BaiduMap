@@ -18,4 +18,7 @@
 	        // do somethings
 	        console.log(rs);
      });
+#### 3. 说明
+     可自行下载在上面拓展更多功能
+
 

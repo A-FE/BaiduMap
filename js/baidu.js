@@ -6,80 +6,75 @@
  * */
 function initMap(callback) {
     $('body').append('<div class="BaiduPoint"></div>');
-    getLocation(function (Point) {
-        BDmap(Point, function (rs) {
+        BDmap( function (rs) {
             callback(rs);
-        });
     });
 
-    /* 浏览器内置定位功能,获取用户当前的坐标 --start */
-    function getLocation(callback) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, locationError, {
-                // 指示浏览器获取高精度的位置，默认为false
-                enableHighAccuracy: true,
-                // 指定获取地理位置的超时时间，默认不限时，单位为毫秒
-                timeout: 5000,
-                // 最长有效期，在重复获取地理位置时，此参数指定多久再次获取位置。
-                maximumAge: 3000
-            });
-        } else {
-            alert("浏览器不支持地址定位")
-        }
-        /* 获取地址成功时的执行函数 */
-        function showPosition(position) {
-            callback({
-                lng: position.coords.longitude,
-                lat: position.coords.latitude
-            });
-        }
-
-        /* 获取地址失败时的执行函数 */
-        function locationError(error) {
-            callback({});
-            switch (error.code) {
-                case error.TIMEOUT:
-                    alert("连接超时!");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("未知的位置!");
-                    break;
-                case error.PERMISSION_DENIED:
-                    alert("请将 微信获取当前位置权限 设为允许");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("未知错误!");
-                    break;
-            }
-        }
-
-        /* 浏览器内置定位功能 --end */
-
-    }
-
     /* 渲染地图
-     * @param usePoint 用户当前的坐标，json对象
      * @param callback 回调函数
      * @return none
      * @author pengYuanYuan
      * */
-    function BDmap(usePoint, callback) {
+    function BDmap(callback) {
         // 百度地图API功能
         var map = new BMap.Map('map', {enableMapClick: false});       // new一个百度地图
         map.enableScrollWheelZoom();                                  // 启用滚轮放大缩小
         map.enableInertialDragging();
         map.enableContinuousZoom();
 
-        if (usePoint.lng) {
-            transformPoint(usePoint, function (point) {
-                usePoint = point;
-                var poi = new BMap.Point(usePoint.lng, usePoint.lat);           // 用户所在的坐标
-                map.centerAndZoom(poi, 18);                                 // 定位中心点，放大倍数
-            });
 
-        } else {
-            map.centerAndZoom('北京', 12);      // 初始化地图,用城市名设置地图中心点
-        }
+
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r){
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                //var mk = new BMap.Marker(r.point);
+                //map.addOverlay(mk);
+                map.panTo(r.point);  // panTo()方法将让地图平滑移动至新中心点
+                map.centerAndZoom(r.point, 18);                                 // 定位中心点，放大倍数
+
+            }
+            else {
+                console.log('failed'+this.getStatus());
+            }
+        },{enableHighAccuracy: true});
+        //关于状态码
+        //BMAP_STATUS_SUCCESS	检索成功。对应数值“0”。
+        //BMAP_STATUS_CITY_LIST	城市列表。对应数值“1”。
+        //BMAP_STATUS_UNKNOWN_LOCATION	位置结果未知。对应数值“2”。
+        //BMAP_STATUS_UNKNOWN_ROUTE	导航结果未知。对应数值“3”。
+        //BMAP_STATUS_INVALID_KEY	非法密钥。对应数值“4”。
+        //BMAP_STATUS_INVALID_REQUEST	非法请求。对应数值“5”。
+        //BMAP_STATUS_PERMISSION_DENIED	没有权限。对应数值“6”。(自 1.1 新增)
+        //BMAP_STATUS_SERVICE_UNAVAILABLE	服务不可用。对应数值“7”。(自 1.1 新增)
+        //BMAP_STATUS_TIMEOUT	超时。对应数值“8”。(自 1.1 新增)
+
+        // 添加带有定位的导航控件
+        var navigationControl = new BMap.NavigationControl({
+            // 靠左上角位置
+            anchor: BMAP_ANCHOR_TOP_LEFT,
+            // LARGE类型
+            type: BMAP_NAVIGATION_CONTROL_LARGE,
+            // 启用显示定位
+            enableGeolocation: true
+        });
+        map.addControl(navigationControl);
+        // 添加定位控件
+        var geolocationControl = new BMap.GeolocationControl();
+        geolocationControl.addEventListener("locationSuccess", function(e){
+            // 定位成功事件
+            var address = '';
+            address += e.addressComponent.province;
+            address += e.addressComponent.city;
+            address += e.addressComponent.district;
+            address += e.addressComponent.street;
+            address += e.addressComponent.streetNumber;
+            alert("当前定位地址为：" + address);
+        });
+        geolocationControl.addEventListener("locationError",function(e){
+            // 定位失败事件
+            alert(e.message);
+        });
+        map.addControl(geolocationControl);
 
         // 添加地图移动事件
         map.addEventListener('moving', function () {
