@@ -22,8 +22,6 @@ function initMap(callback) {
         map.enableInertialDragging();
         map.enableContinuousZoom();
 
-
-
         var geolocation = new BMap.Geolocation();
         geolocation.getCurrentPosition(function(r){
             if(this.getStatus() == BMAP_STATUS_SUCCESS){
@@ -31,7 +29,6 @@ function initMap(callback) {
                 //map.addOverlay(mk);
                 map.panTo(r.point);  // panTo()方法将让地图平滑移动至新中心点
                 map.centerAndZoom(r.point, 18);                                 // 定位中心点，放大倍数
-
             }
             else {
                 console.log('failed'+this.getStatus());
@@ -58,6 +55,7 @@ function initMap(callback) {
             enableGeolocation: true
         });
         map.addControl(navigationControl);
+
         // 添加定位控件
         var geolocationControl = new BMap.GeolocationControl();
         geolocationControl.addEventListener("locationSuccess", function(e){
