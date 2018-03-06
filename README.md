@@ -1,5 +1,5 @@
 # 百度地图定位，选择地址插件
-* [在线DOM](https://peng1992.github.io/BaiduMap/)
+* [在线DOM](https://webcodefarmer.github.io/BaiduMap/)
 
 ### 介绍
 * 定位精度10m左右，定位效果与APP定位不相上下
