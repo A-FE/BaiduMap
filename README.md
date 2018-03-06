@@ -1,4 +1,4 @@
-# 百度地图定位，选择地址插件
+# 百度地图定位示例
 * [在线DOM](https://webcodefarmer.github.io/BaiduMap/)
 
 ### 介绍
